@@ -1,0 +1,28 @@
+#!/bin/sh
+# gitmoji as a commit hook
+
+# Check if gitmoji is installed locally
+if [ -x "$(command -v ./node_modules/.bin/gitmoji)" ]; then
+  # Use the locally installed gitmoji executable
+  GITMOJI="./node_modules/.bin/gitmoji"
+else
+  # Use the global gitmoji executable
+  GITMOJI="$(command -v gitmoji)"
+fi
+
+# Run gitmoji with the provided arguments, and capture its output to a variable
+# The `exec` command takes over the terminal, so we use a sub-shell to run the
+# gitmoji command and capture its output to the `output` variable. This is necessary
+# because when running the gitmoji CLI inside a Git hook, it can sometimes print out
+# progress updates on new lines, which can make it difficult to navigate and use the CLI.
+# By capturing the output of the gitmoji command in a sub-shell and then printing it out
+# after the command has finished running, we can ensure that any progress updates are not
+# displayed on new lines and instead printed out in a single line.
+output="$(
+  exec < /dev/tty && \
+  ($GITMOJI --hook $1 $2) 2>&1 >/dev/tty
+)"
+
+
+# Display the output in the terminal
+echo "$output"
